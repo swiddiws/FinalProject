@@ -48,7 +48,12 @@ int main(int argc, char **argv) {
 }
 
 /*
+
+    Note listed below for current understanding of this code.
+
+    Start,
    Note listed below for current understanding of this code.
+
 
     IMAGE Object
         A PPM file is imported via a image<rgb> object.
@@ -58,6 +63,37 @@ int main(int argc, char **argv) {
         of red, green and blue shade from 0-255.
 
         Attempt at Visualization (hypothetical 3 x 3 pixel image):
+
+               0          1       2
+         0  [(0,0,0), (1,0,0), (2,0,0)]
+         1  [(0,1,0), (1,1,2), (2,1,2)]
+         2  [(0,2,0), (1,2,2), (2,2,4)]
+
+         Such that image->access[0][1] return a rgb object (0,1,0).
+         Such that image->access[0][1].r return a int 0.
+
+    Next,
+
+        image is separated to image<float> for each red, blue and green colors.
+
+        Attempt at Visualization (for red image):
+             0  1  2
+         0  [0, 1, 2]
+         1  [0, 1, 2]
+         2  [0, 1, 2]
+   
+   Next,
+
+        looks like a smooth function is called. Cannot figure out the math behind it.
+        
+        Attempt at Visualization (for red image with sigma=0.5):
+
+             0      1           2
+         0  [0, 1072693248, 1073741824]
+         1  [0, 1072693248, 1073741824]
+         2  [0, 1072693248, 1073741824]
+
+=======
                    0            1         2
          0  [(255,20,30), (10,222,1), (56,4,87)]
          1  [(255,20,30), (10,222,1), (56,78,87)]
@@ -65,4 +101,5 @@ int main(int argc, char **argv) {
 
          Such that image->access[0][1] return a rgb object (255,20,30).
          Such that image->access[0][1].r return a int 255.
+
 */
