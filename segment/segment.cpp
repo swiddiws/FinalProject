@@ -18,10 +18,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 #include <cstdio>
 #include <cstdlib>
-#include <image.h>
-#include <misc.h>
-#include <pnmfile.h>
+#include "image.h"
+#include "misc.h"
+#include "pnmfile.h"
 #include "segment-image.h"
+
+image<rgb>* generate_test_ppm() {
+    int h = 100;
+    int w = 100;
+    image<rgb>* test_im = new image<rgb>(h, w);
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            rgb t = rgb();
+            t.r = x;
+            t.g = y;
+            t.b = x*y;
+            test_im->access[y][x] = t;
+        }
+    }
+    savePPM(test_im, "custom-ppm-for-testing.ppm");
+    return test_im;
+}
 
 int main(int argc, char **argv) {
   if (argc != 6) {
@@ -34,72 +51,17 @@ int main(int argc, char **argv) {
   int min_size = atoi(argv[3]);
 	
   printf("loading input image.\n");
-  image<rgb> *input = loadPPM(argv[4]);
-	
+  // image<rgb> *input = loadPPM(argv[4]);
+
+  image<rgb>* test_im = generate_test_ppm();
+
   printf("processing\n");
   int num_ccs; 
-  image<rgb> *seg = segment_image(input, sigma, k, min_size, &num_ccs); 
+  image<rgb>* seg = segment_image(test_im, sigma, k, min_size, &num_ccs);
   savePPM(seg, argv[5]);
 
   printf("got %d components\n", num_ccs);
   printf("done! uff...thats hard work.\n");
-
+  
   return 0;
 }
-
-/*
-
-    Note listed below for current understanding of this code.
-
-    Start,
-   Note listed below for current understanding of this code.
-
-
-    IMAGE Object
-        A PPM file is imported via a image<rgb> object.
-        Basically the class holds a 2-D matrix, that at
-        each (x,y) coordinate then holds a rgb object. A
-        rgb object simple holds the pixels content in terms 
-        of red, green and blue shade from 0-255.
-
-        Attempt at Visualization (hypothetical 3 x 3 pixel image):
-
-               0          1       2
-         0  [(0,0,0), (1,0,0), (2,0,0)]
-         1  [(0,1,0), (1,1,2), (2,1,2)]
-         2  [(0,2,0), (1,2,2), (2,2,4)]
-
-         Such that image->access[0][1] return a rgb object (0,1,0).
-         Such that image->access[0][1].r return a int 0.
-
-    Next,
-
-        image is separated to image<float> for each red, blue and green colors.
-
-        Attempt at Visualization (for red image):
-             0  1  2
-         0  [0, 1, 2]
-         1  [0, 1, 2]
-         2  [0, 1, 2]
-   
-   Next,
-
-        looks like a smooth function is called. Cannot figure out the math behind it.
-        
-        Attempt at Visualization (for red image with sigma=0.5):
-
-             0      1           2
-         0  [0, 1072693248, 1073741824]
-         1  [0, 1072693248, 1073741824]
-         2  [0, 1072693248, 1073741824]
-
-=======
-                   0            1         2
-         0  [(255,20,30), (10,222,1), (56,4,87)]
-         1  [(255,20,30), (10,222,1), (56,78,87)]
-         2  [(1,12,13), (54,56,75), (10,86,7)]
-
-         Such that image->access[0][1] return a rgb object (255,20,30).
-         Such that image->access[0][1].r return a int 255.
-
-*/
