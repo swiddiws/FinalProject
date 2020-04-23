@@ -1,10 +1,3 @@
-/*
-    Graph Implementation
-    
-    After reviewing, might not fit what we needed.
-
-
-*/
 #ifndef CUSTOM_GRAPH_H
 #define CUSTOM_GRAPH_H
 
@@ -20,84 +13,77 @@ class custom_graph {
 public:
     custom_graph(const int width, const int height);
     ~custom_graph();
-    void addVertex(const T& value);
-    void addEdge(int source, int target);
-    T& operator [](int vertex);
-    T operator [](int vertex) const;
-    bool isEdge(int source, int target) const;
-    std::set<int> neighbors(int vertex) const;
+    Vertex& operator [](int vertex);
+    Vertex operator [](int vertex) const;
+    void add_vertex(int x, int y);
+    void add_edge(int x1, int y1, int x2, int y2, float weight);
+    int find_vertex_index(int x, int y);
 private:
-    static const int MAXIMUM = 200;
-    bool adjacencyMatrix[MAXIMUM][MAXIMUM];
-    T labels[MAXIMUM];
-    int manyVertices;
     int h;
     int w;
+    Vertex* labels;
+    float** connections;
+    int row_counter;
 };
-
-template <class T>
-const int custom_graph<T>::MAXIMUM;
 
 template <class T>
 custom_graph<T>::custom_graph(const int width, const int height) {
     h = height;
     w = width;
+    row_counter = 0;
+    labels = new Vertex[h*w];
+    connections = new float*[h*w];
+    for (int x = 0; x < h*w; ++x) {
+        connections[x] = new float[h*w];
+    }
 }
 
 template <class T>
 custom_graph<T>::~custom_graph() {
+    delete[] labels;
+    delete[] connections;
 
 }
 
 template <class T>
-void custom_graph<T>::addVertex(const T& value) {
-    assert(manyVertices < h);
-    int newVertexNumber = manyVertices;
-    manyVertices++;
-    for (int otherVertexNumber = 0; otherVertexNumber < manyVertices; otherVertexNumber++) {
-        adjacencyMatrix[otherVertexNumber][newVertexNumber] = false;
-        adjacencyMatrix[newVertexNumber][otherVertexNumber] = false;
+void custom_graph<T>::add_vertex(int x, int y) {
+    Vertex v = { x, y };
+    int row_index = row_counter;
+    row_counter++;
+    for (int column_index = 0; column_index < h*w; column_index++) {
+        connections[column_index][row_index] = NULL;
+        connections[row_index][column_index] = NULL;
     }
-    labels[newVertexNumber] = value;
+    labels[row_index] = v;
 }
 
 template <class T>
-void custom_graph<T>::addEdge(int source, int target) {
-    assert(source < h && target < w);
-    adjacencyMatrix[source][target] = true;
-}
-
-template <class T>
-T& custom_graph<T>::operator [](int vertex) {
-    assert(vertex < h);
+Vertex& custom_graph<T>::operator [](int vertex) {
     return labels[vertex];
 }
 
 template <class T>
-T custom_graph<T>::operator [](int vertex) const {
-    assert(vertex < h);
+Vertex custom_graph<T>::operator [](int vertex) const {
     return labels[vertex];
 }
 
 template <class T>
-bool custom_graph<T>::isEdge(int source, int target) const {
-    assert(source < h && target < w);
-    bool isAnEdge = false;
-    isAnEdge = adjacencyMatrix[source][target];
-    return isEdge;
+void custom_graph<T>::add_edge(int x1, int y1, int x2, int y2, float weight) {
+    int source = find_vertex_index(x1, y1);
+    int target = find_vertex_index(x2, y2);
+    //printf("(%d, %d) index: %d  --  (%d, %d) index: %d\n", x1, y1, source, x2, y2, target);
+    connections[source][target] = weight;
 }
 
 template <class T>
-std::set<int> custom_graph<T>::neighbors(int vertex) const {
-    assert(vertex < h);
-    std::set<int> vertexNeighbors;
-
-    for (int i = 0; i < w; i++) {
-        if (adjacencyMatrix[vertex][i]) {
-            vertexNeighbors.insert(i);
+int custom_graph<T>::find_vertex_index(int x, int y) {
+    for (int i = 0; i < h * w; i++) {
+        Vertex tmp = labels[i];
+        if (tmp.x == x && tmp.y == y) {
+            return i;
         }
     }
-    return vertexNeighbors;
 }
+
 
 #endif
